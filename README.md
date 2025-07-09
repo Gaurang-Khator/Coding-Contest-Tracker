@@ -1,31 +1,35 @@
-# Contest Tracker
+# 🚀 Coding Contest Tracker
 
-A web application that helps you stay updated with the latest competitive programming contests from multiple platforms including Codeforces, LeetCode, and CodeChef.
+*Coding Contest Tracker* is a web-based application that helps competitive programmers stay up-to-date with upcoming, ongoing, and completed contests across multiple platforms such as *Codeforces, **LeetCode, and **CodeChef* — all in one dashboard.
 
+---
 
-## Features
+## 📌 Features
 
-- Real-time tracking of programming contests
-- Filter contests by platform
-- Search functionality for contests
-- Status indicators (Upcoming, Ongoing, Completed)
-- Clean and responsive UI
-- Platform-specific color schemes
-- Direct links to contest pages
-- Dark/Light mode toggle
-- Bookmark favorite contests
+- 🔄 Real-time contest updates from APIs
+- 🗂 Filter contests by platform
+- 🔍 Search contests by name
+- 🟢 Status indicators: Upcoming, Ongoing, Completed
+- 🎨 Clean and responsive UI with platform-specific themes
+- 🌗 Toggle between Light and Dark modes
+- ⭐ Bookmark your favorite contests
+- 🔗 Direct links to contest detail pages
 
-## Tech Stack
+---
 
-- [Next.js](https://nextjs.org/) - React framework
-- [TypeScript](https://www.typescriptlang.org/) - Type safety
-- [Tailwind CSS](https://tailwindcss.com/) - Styling
-- [Lucide React](https://lucide.dev/) - Icons
-- [Shadcn UI](https://ui.shadcn.com/) - UI Components
-- [MongoDB](https://www.mongodb.com/) - Database
-- [Zod](https://zod.dev/) - Schema validation
+## 🛠 Tech Stack
 
-## Project Structure
+| Category       | Tech Used                       |
+|----------------|----------------------------------|
+| Frontend       | [Next.js](https://nextjs.org/), [TypeScript](https://www.typescriptlang.org/), [Tailwind CSS](https://tailwindcss.com/) |
+| UI Components  | [Shadcn UI](https://ui.shadcn.com/), [Lucide React](https://lucide.dev/) |
+| Backend/API    | Next.js API routes              |
+| Database       | [MongoDB](https://www.mongodb.com/) |
+| Validation     | [Zod](https://zod.dev/)         |
+
+---
+
+## 📁 Project Structure
 
 ```
 src/
