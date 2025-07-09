@@ -14,7 +14,6 @@ A web application that helps you stay updated with the latest competitive progra
 - Direct links to contest pages
 - Dark/Light mode toggle
 - Bookmark favorite contests
-- YouTube solution links for contests
 
 ## Tech Stack
 
@@ -37,7 +36,6 @@ src/
 │   │   ├── codeforces/
 │   │   ├── contests/
 │   │   ├── leetcode/
-│   │   └── youtube/
 │   ├── form/
 │   ├── types/
 │   └── page.tsx
@@ -56,7 +54,6 @@ The application includes API routes for fetching and managing data:
 - `/api/codechef` - Fetches contests from CodeChef
 - `/api/contests` - Fetches contests from all platforms
 - `/api/bookmark` - Manages bookmarked contests
-- `/api/youtube` - Manages YouTube solution links
 
 ## Types
 
@@ -110,18 +107,11 @@ Filter contests by platform (Codeforces, LeetCode, CodeChef) or view all contest
 ### Bookmarks
 Save your favorite contests for quick access.
 
-### YouTube Solutions
-View solution videos for contests or upload your own YouTube links to share with the community.
-
 ### Dark/Light Mode
 Toggle between dark and light themes based on your preference.
 
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
 ## Future Integrations 
 - Scheduled Emails for contests
-- Support for other platforms like HackerRank, AtCoder
+- Support for other platforms like GFG, AtCoder
 - User authentication and profiles
 - Contest reminders and notifications
