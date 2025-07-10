@@ -1,6 +1,6 @@
 # 🚀 Coding Contest Tracker
 
-*Coding Contest Tracker* is a web-based application that helps competitive programmers stay up-to-date with upcoming, ongoing, and completed contests across multiple platforms such as **Codeforces*, **LeetCode*, and **CodeChef* — all in one dashboard.
+*Coding Contest Tracker* is a web-based application that helps competitive programmers stay up-to-date with upcoming, ongoing, and completed contests across multiple platforms such as *Codeforces*, *LeetCode*, and *CodeChef* — all in one dashboard.
 
 ---
 
@@ -102,7 +102,7 @@ interface FormValues {
   youtubeUrl: string;
   contestId: string;
 }
-
+```
 
 # ✨ Feature Highlights
 
