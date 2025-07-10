@@ -161,8 +161,6 @@ Here are some features and improvements planned for future versions of the Conte
 - [ ] *User Dashboard*  
   Personal dashboard for tracking bookmarked and participated contests.
 
-- [ ] *Analytics (Optional)*  
-  Show stats like contest frequency, average duration, or weekly programming calendar.
 
 ---
 
