@@ -208,7 +208,26 @@ export default function ContestCard({
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 px-4">
       {contests?.length > 0 ? (
-        contests.map((contest: Contest) => {
+        contests.map((item: any, index: number) => {
+          // Check if this is a section header
+          if (item.type === 'section-header') {
+            return (
+              <div key={item.id} className="col-span-full">
+                <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mt-8 mb-4 first:mt-0">
+                  {item.title}
+                </h2>
+              </div>
+            );
+          }
+
+          // Cast to Contest type for regular contest items
+          const contest = item as Contest;
+          
+          // Safety check for platform property
+          if (!contest.platform) {
+            return null;
+          }
+
           const bookmarked = isContestBookmarked(contest);
           return (
             <Card
@@ -236,11 +255,11 @@ export default function ContestCard({
                   </div>
                   <div
                     className={cn(
-                      `${checkStatus(contest.status.toLowerCase())}`,
+                      `${checkStatus(contest.status?.toLowerCase() || 'upcoming')}`,
                       "rounded-sm px-2 py-1 text-sm font-medium uppercase"
                     )}
                   >
-                    {contest.status}
+                    {contest.status || 'upcoming'}
                   </div>
                 </div>
                 <CardTitle className="font-medium mt-2">

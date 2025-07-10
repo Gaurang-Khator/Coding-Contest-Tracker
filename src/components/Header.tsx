@@ -7,7 +7,7 @@ export default function Header() {
           <Code className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
         </div>
         <h1 className="text-2xl sm:text-4xl font-semibold tracking-tight">
-          Contest Tracker
+          Coding Contest Tracker
         </h1>
       </div>
       <div className="text-center">

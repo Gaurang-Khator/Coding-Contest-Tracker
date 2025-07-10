@@ -9,7 +9,7 @@ export default function ToggleTheme() {
   return (
     <button 
       onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-      className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
+      className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg cursor-pointer transition-colors"
     >
       {theme === "light" ? (
         <Moon className="w-5 h-5" />
