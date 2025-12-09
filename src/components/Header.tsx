@@ -1,17 +1,21 @@
-import { Code } from "lucide-react";
+import { Code2, Zap } from "lucide-react";
+
 export default function Header() {
   return (
-    <div className="flex items-center justify-center w-full flex-col px-4">
-      <div className="flex items-center gap-2 mb-2">
-        <div className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-icon text-icon-foreground">
-          <Code className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+    <div className="space-y-2">
+      <div className="flex items-center gap-3">
+        <div className="bg-gradient-to-br from-blue-600 to-purple-600 p-2 rounded-lg">
+          <Code2 className="w-6 h-6 text-white" />
         </div>
-        <h1 className="text-2xl sm:text-4xl font-semibold tracking-tight">
-          Coding Contest Tracker
-        </h1>
-      </div>
-      <div className="text-center">
-        <span className="text-sm sm:text-base text-subtitle">Stay updated with the latest competitive programming contests from Codeforces, LeetCode, and CodeChef.</span>
+        <div>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            Contest Tracker
+          </h1>
+          <p className="text-sm text-muted-foreground flex items-center gap-1">
+            <Zap className="w-4 h-4" />
+            Stay updated with coding contests
+          </p>
+        </div>
       </div>
     </div>
   );

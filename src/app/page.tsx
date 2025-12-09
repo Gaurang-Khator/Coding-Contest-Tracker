@@ -1,14 +1,12 @@
 import { Metadata } from "next";
-import ContestCard from "@/components/ContestCard";
 import ContestsSearch from "@/components/ContestsSearch";
 import Header from "@/components/Header";
 import PlatFormFilters from "@/components/PlatformFilters";
-import axios from "axios";
 import { Contest } from "./types/contest";
 import { Suspense } from "react";
 import { cookies } from "next/headers";
-import { Sun } from "lucide-react";
 import ToggleTheme from "@/components/ToggleTheme";
+import ContestTabs from "@/components/ContestTabs";
 
 export const metadata: Metadata = {
   title: "Coding Contest Tracker",
@@ -22,7 +20,6 @@ type PageProps = {
 
 // Helper function to get contest start time safely
 const getContestStartTime = (contest: Contest): Date => {
-  // Try different possible field names for start time
   const startTime = contest.startTime || 
                    (contest as any).start_time || 
                    (contest as any).startDate || 
@@ -30,7 +27,6 @@ const getContestStartTime = (contest: Contest): Date => {
                    null;
   
   if (!startTime) {
-    // If no start time is found, return current time as fallback
     return new Date();
   }
   
@@ -40,7 +36,6 @@ const getContestStartTime = (contest: Contest): Date => {
 // Helper function to get contest end time safely
 const getContestEndTime = (contest: Contest): Date => {
   try {
-    // Try different possible field names for end time
     const endTime = (contest as any).endTime || 
                    (contest as any).end_time || 
                    (contest as any).endDate || 
@@ -48,46 +43,36 @@ const getContestEndTime = (contest: Contest): Date => {
                    (contest as any).duration || 
                    null;
     
-    if (endTime) {
-      const endDate = new Date(endTime);
-      if (!isNaN(endDate.getTime())) {
-        return endDate;
-      }
+    if (endTime && typeof endTime === 'string' && !isNaN(Date.parse(endTime))) {
+      return new Date(endTime);
     }
     
-    // If no direct end time, calculate from start time + duration
     const startTime = getContestStartTime(contest);
     
-    // Try to get duration if available
     const duration = (contest as any).duration || 
                     (contest as any).durationSeconds || 
                     (contest as any).length || 
                     null;
     
     if (duration) {
-      // If duration is in seconds
       if (typeof duration === 'number') {
-        return new Date(startTime.getTime() + duration * 1000);
+        return new Date(startTime.getTime() + duration);
       }
-      // If duration is in minutes or hours (handle string format)
       if (typeof duration === 'string') {
         const durationMs = parseDuration(duration);
         return new Date(startTime.getTime() + durationMs);
       }
     }
     
-    // Default fallback: assume 2 hours duration
     return new Date(startTime.getTime() + 2 * 60 * 60 * 1000);
   } catch (error) {
-    // If any error occurs, return start time + 2 hours
     const startTime = getContestStartTime(contest);
     return new Date(startTime.getTime() + 2 * 60 * 60 * 1000);
   }
 };
 
-// Helper function to parse duration strings (e.g., "2h 30m", "150m", "2:30:00")
+// Helper function to parse duration strings
 const parseDuration = (duration: string): number => {
-  // Handle formats like "2h 30m", "150m", "2:30:00"
   if (duration.includes('h') || duration.includes('m')) {
     const hours = duration.match(/(\d+)h/);
     const minutes = duration.match(/(\d+)m/);
@@ -102,7 +87,6 @@ const parseDuration = (duration: string): number => {
     return (hours * 3600 + minutes * 60 + seconds) * 1000;
   }
   
-  // Assume it's minutes if just a number
   const mins = parseInt(duration);
   return isNaN(mins) ? 2 * 60 * 60 * 1000 : mins * 60 * 1000;
 };
@@ -122,79 +106,35 @@ const getContestStatus = (contest: Contest): 'ongoing' | 'upcoming' | 'completed
   }
 };
 
-// Helper function to determine if a contest is upcoming (for backward compatibility)
-const isUpcomingContest = (contest: Contest): boolean => {
-  return getContestStatus(contest) === 'upcoming';
-};
-
-// Helper function to sort contests: ongoing first, then upcoming, then limited completed
-const sortContests = (contests: Contest[]): Contest[] => {
-  // Separate contests by status
-  const ongoingContests = contests.filter(contest => getContestStatus(contest) === 'ongoing');
-  const upcomingContests = contests.filter(contest => getContestStatus(contest) === 'upcoming');
-  const completedContests = contests.filter(contest => getContestStatus(contest) === 'completed');
-  
-  // Sort ongoing contests by earliest start time first (most recently started)
-  const sortedOngoing = ongoingContests.sort((a, b) => {
-    const aStartTime = getContestStartTime(a).getTime();
-    const bStartTime = getContestStartTime(b).getTime();
-    return bStartTime - aStartTime; // Most recent first
-  });
-  
-  // Sort upcoming contests by earliest start time first
-  const sortedUpcoming = upcomingContests.sort((a, b) => {
-    const aStartTime = getContestStartTime(a).getTime();
-    const bStartTime = getContestStartTime(b).getTime();
-    return aStartTime - bStartTime;
-  });
-  
-  // Sort completed contests by most recent start time first
-  const sortedCompleted = completedContests.sort((a, b) => {
-    const aStartTime = getContestStartTime(a).getTime();
-    const bStartTime = getContestStartTime(b).getTime();
-    return bStartTime - aStartTime;
-  });
-  
-  // Group completed contests by platform and limit to 3 per platform
-  const completedByPlatform = sortedCompleted.reduce((acc, contest) => {
-    const platform = contest.platform.toLowerCase();
-    if (!acc[platform]) {
-      acc[platform] = [];
-    }
-    if (acc[platform].length < 3) {
-      acc[platform].push(contest);
-    }
-    return acc;
-  }, {} as Record<string, Contest[]>);
-  
-  // Flatten the limited completed contests
-  const limitedCompleted = Object.values(completedByPlatform).flat();
-  
-  // Add section markers for UI (you can use these in your ContestCard component)
-  const result = [];
-  
-  if (sortedOngoing.length > 0) {
-    result.push(
-      { type: 'section-header', title: 'Ongoing Contests', id: 'ongoing-header' } as any,
-      ...sortedOngoing
-    );
-  }
-  
-  if (sortedUpcoming.length > 0) {
-    result.push(
-      { type: 'section-header', title: 'Upcoming Contests', id: 'upcoming-header' } as any,
-      ...sortedUpcoming
-    );
-  }
-  
-  if (limitedCompleted.length > 0) {
-    result.push(
-      { type: 'section-header', title: 'Recent Completed Contests', id: 'completed-header' } as any,
-      ...limitedCompleted
-    );
-  }
-  
-  return result;
+// Helper function to sort contests
+const sortAndStatusContests = (contests: Contest[]): (Contest & { status?: string })[] => {
+  return contests
+    .map(c => ({
+      ...c,
+      status: getContestStatus(c)
+    }))
+    .sort((a, b) => {
+      // Separate ongoing, upcoming, and completed
+      const statusOrder: Record<string, number> = { ongoing: 0, upcoming: 1, completed: 2 };
+      const aStatusOrder = statusOrder[(a as any).status] || 1;
+      const bStatusOrder = statusOrder[(b as any).status] || 1;
+      
+      if (aStatusOrder !== bStatusOrder) {
+        return aStatusOrder - bStatusOrder;
+      }
+      
+      // Within same status, sort by start time
+      const aStartTime = getContestStartTime(a).getTime();
+      const bStartTime = getContestStartTime(b).getTime();
+      
+      if ((a as any).status === 'completed') {
+        // For completed, show newest first
+        return bStartTime - aStartTime;
+      } else {
+        // For upcoming/ongoing, show soonest first
+        return aStartTime - bStartTime;
+      }
+    });
 };
 
 export default async function Home({ params, searchParams }: PageProps) {
@@ -202,7 +142,7 @@ export default async function Home({ params, searchParams }: PageProps) {
   const platform = searchParamsResolved?.platform?.toString().toLowerCase();
   const searchQuery = searchParamsResolved?.contest?.toString();
 
-  let contests: Contest[] = [];
+  let contests: (Contest & { status?: string })[] = [];
   let isBookmarksPage = false;
   let bookmarkedContestIds: string[] = [];
   
@@ -218,47 +158,40 @@ export default async function Home({ params, searchParams }: PageProps) {
 
     if (platform === "bookmarks") {
       isBookmarksPage = true;
-      contests = bookmarkedContests;
+      contests = sortAndStatusContests(bookmarkedContests);
     } else if (!platform || platform === "all platforms") {
       const [codechefData, codeforcesData, leetcodeData] = await Promise.all([
         fetch(`${baseUrl}/api/codechef`).then((res) => res.json()),
         fetch(`${baseUrl}/api/codeforces`).then((res) => res.json()),
         fetch(`${baseUrl}/api/leetcode`, {
           cache: 'no-store',
-          headers: {
-            'Cache-Control': 'no-cache'
-          }
         }).then((res) => res.json()),
       ]);
 
-      contests = [
+      const allContests = [
         ...(Array.isArray(codechefData) ? codechefData : []),
         ...(Array.isArray(codeforcesData) ? codeforcesData : []),
         ...(Array.isArray(leetcodeData) ? leetcodeData : [])
       ];
+
+      contests = sortAndStatusContests(allContests);
     } else {
       const response = await fetch(`${baseUrl}/api/${platform}`, {
         cache: 'no-store',
-        headers: {
-          'Cache-Control': 'no-cache'
-        }
       });
       const data = await response.json();
-      contests = Array.isArray(data) ? data : [];
+      const platformContests = Array.isArray(data) ? data : [];
+      contests = sortAndStatusContests(platformContests);
     }
 
-    // Apply search filter if query exists
     if (searchQuery) {
       contests = contests.filter(
         (contest) =>
           contest.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
           contest.platform.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          contest.id.toString().includes(searchQuery.toString())
+          contest.id?.toString().includes(searchQuery.toString())
       );
     }
-
-    // Sort contests: upcoming first, then completed
-    contests = sortContests(contests);
 
   } catch (error) {
     console.error("Error fetching contests:", error);
@@ -266,26 +199,39 @@ export default async function Home({ params, searchParams }: PageProps) {
   }
 
   return (
-    <div className="font-[family-name:var(--font-geist-sans)] min-h-screen">
-      <div className="my-8 sm:my-12">
-        <div className="relative max-w-5xl mx-auto px-4">
+    <div className="font-[family-name:var(--font-geist-sans)] min-h-screen bg-gradient-to-br from-background to-secondary/20">
+      {/* Sticky Header */}
+      <div className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <Header />
             <ToggleTheme />
           </div>
-          <Suspense fallback={<div>Loading filters...</div>}>
-            <PlatFormFilters />
-          </Suspense>
         </div>
       </div>
-      <Suspense fallback={<div>Loading search...</div>}>
-        <ContestsSearch />
-      </Suspense>
-      <ContestCard 
-        contests={contests}
-        isBookmarksPage={isBookmarksPage}
-        bookmarkedContestIds={bookmarkedContestIds}
-      />
+
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* Filters */}
+        <Suspense fallback={<div className="h-12 bg-muted rounded-lg animate-pulse" />}>
+          <PlatFormFilters />
+        </Suspense>
+
+        {/* Search */}
+        <div className="mt-6">
+          <Suspense fallback={<div className="h-12 bg-muted rounded-lg animate-pulse" />}>
+            <ContestsSearch />
+          </Suspense>
+        </div>
+
+        {/* Contests Tabs */}
+        <div className="mt-8">
+          <ContestTabs 
+            contests={contests}
+            isBookmarksPage={isBookmarksPage}
+            bookmarkedContestIds={bookmarkedContestIds}
+          />
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,61 +1,60 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
-import { Input } from "./ui/input";
-import { Search } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
+
+import { useSearchParams, useRouter } from "next/navigation";
+import { Input } from "@/components/ui/input";
+import { Search, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
 
 export default function ContestsSearch() {
-  const router = useRouter();
   const searchParams = useSearchParams();
-  const [inputVal, setInputVal] = useState(searchParams.get("contest") || "");
-
-  const createQueryString = useCallback(
-    (value: string) => {
-      const params = new URLSearchParams(searchParams.toString());
-      const platform = params.get("platform");
-
-      const newParams = new URLSearchParams();
-
-      if (platform) {
-        newParams.set("platform", platform);
-      }
-
-      if (value) {
-        newParams.set("contest", value);
-      }
-
-      return newParams.toString();
-    },
-    [searchParams]
-  );
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setInputVal(value);
-    const queryString = createQueryString(value);
-    const url = queryString ? `/?${queryString}` : "/";
-    router.replace(url);
-  };
+  const router = useRouter();
+  const [searchValue, setSearchValue] = useState("");
 
   useEffect(() => {
-    const contest = searchParams.get("contest");
-    if (contest) {
-      setInputVal(contest);
-    }
+    setSearchValue(searchParams?.get("contest") || "");
   }, [searchParams]);
 
+  const handleSearch = (value: string) => {
+    setSearchValue(value);
+    const params = new URLSearchParams(searchParams || "");
+    if (value.trim()) {
+      params.set("contest", value);
+    } else {
+      params.delete("contest");
+    }
+    router.push(`?${params.toString()}`);
+  };
+
+  const handleClear = () => {
+    setSearchValue("");
+    const params = new URLSearchParams(searchParams || "");
+    params.delete("contest");
+    router.push(`?${params.toString()}`);
+  };
+
   return (
-    <div className="relative w-full max-w-md mx-auto mb-8 px-4">
-      <div className="absolute inset-y-0 left-4 pl-3 flex items-center pointer-events-none">
-        <Search className="h-4 w-4 text-muted-foreground" />
+    <div className="relative">
+      <div className="relative">
+        <Search className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
+        <Input
+          type="text"
+          placeholder="Search contests by name, platform, or ID..."
+          value={searchValue}
+          onChange={(e) => handleSearch(e.target.value)}
+          className="pl-10 pr-10 h-11 bg-muted border-0 focus-visible:ring-2 focus-visible:ring-primary"
+        />
+        {searchValue && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute right-1 top-1 h-9 w-9"
+            onClick={handleClear}
+          >
+            <X className="w-4 h-4" />
+          </Button>
+        )}
       </div>
-      <Input
-        type="text"
-        placeholder="Search contests..."
-        className="pl-10"
-        value={inputVal}
-        onChange={handleChange}
-      />
     </div>
   );
 }
